@@ -24,6 +24,7 @@ import org.traccar.Context;
 import org.traccar.database.ConnectionManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
 import java.util.Collection;
@@ -38,6 +39,8 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private static final String KEY_DEVICES = "devices";
     private static final String KEY_POSITIONS = "positions";
     private static final String KEY_EVENTS = "events";
+    private static final String KEY_GEOFENCES = "geofences";
+    private static final String KEY_GEOFENCES_REMOVED = "geofencesRemoved";
 
     private long userId;
 
@@ -61,6 +64,20 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
         super.onWebSocketClose(statusCode, reason);
 
         Context.getConnectionManager().removeListener(userId, this);
+    }
+
+    @Override
+    public void onUpdateGeofence(Geofence geofence) {
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_GEOFENCES, Collections.singletonList(geofence));
+        sendData(data);
+    }
+
+    @Override
+    public void onDeleteGeofence(long geofenceId) {
+        Map<String, Collection<?>> data = new HashMap<>();
+        data.put(KEY_GEOFENCES_REMOVED, Collections.singletonList(geofenceId));
+        sendData(data);
     }
 
     @Override

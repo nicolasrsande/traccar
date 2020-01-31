@@ -15,13 +15,20 @@
  */
 package org.traccar.api.resource;
 
+import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Geofence;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.sql.SQLException;
 
 @Path("geofences")
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,4 +39,32 @@ public class GeofenceResource extends ExtendedObjectResource<Geofence> {
         super(Geofence.class);
     }
 
+    @POST
+    @Override
+    public Response add(Geofence entity) throws SQLException {
+        try {
+            return super.add(entity);
+        } finally {
+            Context.getGeofenceManager().notifyUpdate(entity);
+        }
+    }
+
+    @Path("{id}")
+    @PUT
+    @Override
+    public Response update(Geofence entity) throws SQLException {
+        try {
+            return super.update(entity);
+        } finally {
+            Context.getGeofenceManager().notifyUpdate(entity);
+        }
+    }
+
+    @Path("{id}")
+    @DELETE
+    @Override
+    public Response remove(@PathParam("id") long id) throws SQLException {
+        Context.getGeofenceManager().notifyRemove(id);
+        return super.remove(id);
+    }
 }

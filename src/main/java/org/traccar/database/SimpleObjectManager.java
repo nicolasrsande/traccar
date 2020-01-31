@@ -34,7 +34,7 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObjectManager.class);
 
-    private Map<Long, Set<Long>> userItems;
+    protected Map<Long, Set<Long>> userItems;
 
     protected SimpleObjectManager(DataManager dataManager, Class<T> baseClass) {
         super(dataManager, baseClass);

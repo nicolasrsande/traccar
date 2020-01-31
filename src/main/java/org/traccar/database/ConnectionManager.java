@@ -29,6 +29,7 @@ import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -165,6 +166,22 @@ public class ConnectionManager {
         return result;
     }
 
+    public synchronized void updateGeofence(long userId, Geofence geofence) {
+        if (listeners.containsKey(userId)) {
+            for (UpdateListener listener : listeners.get(userId)) {
+                listener.onUpdateGeofence(geofence);
+            }
+        }
+    }
+
+    public synchronized void deleteGeofence(long userId, long geofenceId) {
+        if (listeners.containsKey(userId)) {
+            for (UpdateListener listener : listeners.get(userId)) {
+                listener.onDeleteGeofence(geofenceId);
+            }
+        }
+    }
+
     public synchronized void updateDevice(Device device) {
         for (long userId : Context.getPermissionsManager().getDeviceUsers(device.getId())) {
             if (listeners.containsKey(userId)) {
@@ -196,6 +213,8 @@ public class ConnectionManager {
     }
 
     public interface UpdateListener {
+        void onUpdateGeofence(Geofence geofence);
+        void onDeleteGeofence(long geofenceId);
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
         void onUpdateEvent(Event event);

@@ -15,8 +15,11 @@
  */
 package org.traccar.database;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.traccar.Context;
 import org.traccar.model.Device;
@@ -27,6 +30,28 @@ public class GeofenceManager extends ExtendedObjectManager<Geofence> {
 
     public GeofenceManager(DataManager dataManager) {
         super(dataManager, Geofence.class);
+    }
+
+    private List<Long> getGeofenceUsers(long geofenceId) {
+        List<Long> result = new ArrayList<>();
+        for (Map.Entry<Long, Set<Long>> entry : userItems.entrySet()) {
+            if (entry.getValue().contains(geofenceId)) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+
+    public void notifyUpdate(Geofence item) {
+        for (long userId : getGeofenceUsers(item.getId())) {
+            Context.getConnectionManager().updateGeofence(userId, item);
+        }
+    }
+
+    public void notifyRemove(long itemId) {
+        for (long userId : getGeofenceUsers(itemId)) {
+            Context.getConnectionManager().deleteGeofence(userId, itemId);
+        }
     }
 
     @Override
